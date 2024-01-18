@@ -29,8 +29,8 @@ public interface ApiRequestHandler {
      * @param request the {@link HttpRequest} object
      * @param client  the {@link HttpClient} to send the request
      * @return the {@link HttpResponse} object containing the API's response as a string
-     * @throws IOException If there's a network or general I/O error.
      * @throws InterruptedException If the request is interrupted
+     * @throws TimeoutException If the request does not complete in time
      */
-    HttpResponse<String> apiResponse(HttpRequest request, HttpClient client) throws IOException, InterruptedException, ExecutionException, TimeoutException;
+    HttpResponse<String> apiResponse(HttpRequest request, HttpClient client) throws InterruptedException, ExecutionException, TimeoutException;
 }

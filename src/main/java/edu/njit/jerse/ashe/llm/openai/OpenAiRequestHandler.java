@@ -4,7 +4,6 @@ import edu.njit.jerse.ashe.llm.api.ApiRequestHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -90,14 +89,13 @@ public class OpenAiRequestHandler implements ApiRequestHandler {
      * @param client  the HttpClient used to send the request. Must be non-null.
      * @return HttpResponse&lt;String&gt; the response from the API
      * @throws IllegalArgumentException if either request or client is null
-     * @throws IOException              if an I/O error occurs, or if the response is not received within 60 seconds
      * @throws InterruptedException     if the operation is interrupted
      * @throws ExecutionException       if the CompletableFuture throws an exception while getting the response
-     * @throws TimeoutException         if waiting for the CompletableFuture times out
+     * @throws TimeoutException         if the CompletableFuture does not complete within {@link gptResponseTimeout}
      */
     @Override
     public HttpResponse<String> apiResponse(HttpRequest request, HttpClient client)
-            throws IOException, InterruptedException, ExecutionException, TimeoutException {
+            throws InterruptedException, ExecutionException, TimeoutException {
 
         if (request == null || client == null) {
             throw new IllegalArgumentException("Request or Client cannot be null");
@@ -123,8 +121,8 @@ public class OpenAiRequestHandler implements ApiRequestHandler {
             LOGGER.info("API response received with status code " + response.statusCode());
             return response;
         } catch (TimeoutException e) {
-            LOGGER.fatal("API response took too long to be received");
-            throw new IOException("API response took too long", e);
+            LOGGER.fatal("API response took too long to be received (over " + gptResponseTimeout + " seconds)");
+            throw e;
         } finally {
             executor.shutdown();
         }
